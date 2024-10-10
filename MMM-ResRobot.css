@@ -1,40 +1,42 @@
-.ResRobot {
+.MMM-ResRobot {
   font-size: 75%;
   line-height: 65px;
   display: inline-block;
+  width: fit-content;
   -ms-transform: translate(0, -3px); /* IE 9 */
   -webkit-transform: translate(0, -3px); /* Safari */
   transform: translate(0, -3px);
 }
 
 .ResRobot table {
-    width: 400px;
+    /* width: fit-content; */
 }
 
 .departuretime {
-    width: 20%;
-    align: left;
+    padding-right: 10px;
+}
+/*
+.departuretype {
     padding-right: 10px;
 }
 
-.departuretype {
-    width: 10%;
-    align: right;
+.linetype {
     padding-right: 10px;
 }
+
 
 .lineno {
-    width: 15%;
-    align: right;
     padding-right: 10px;
 }
+
+
 
 .trackno {
     width: 10%;
-    align: right;
+    text-align: right;
     padding-right: 10px;
 }
 
 .destination {
-    align: left;
-}
+    text-align: left;
+} */

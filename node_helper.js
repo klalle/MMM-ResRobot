@@ -36,6 +36,7 @@ module.exports = NodeHelper.create({
 	 * Check current departures and remove old ones. Requests new departure data if needed.
 	 */
 	updateDepartures: function() {
+
 		var self = this;
 		var now = moment();
 		var cutoff = now.clone().add(moment.duration(this.config.skipMinutes, "minutes"));
@@ -76,7 +77,7 @@ module.exports = NodeHelper.create({
 		// If a route has departures, save them to output
 		var getRoutes = [];
 		for (var routeId in this.config.routes) {
-			if (typeof departures[routeId] == 'undefined' || departures[routeId].length == 0) {
+			if (typeof departures[routeId] == 'undefined' || departures[routeId].length === 0) {
 				// Get current list of departures between from and to
 				var params = { "id": this.config.routes[routeId].from };
 				if (typeof this.config.routes[routeId].to == "string" && this.config.routes[routeId].to !== "") {
@@ -94,7 +95,7 @@ module.exports = NodeHelper.create({
 			}
 		}
 		// Array getRoutes contains id and url for each route that we need to retrieve departures for
-		if (getRoutes.length == 0) {
+		if (getRoutes.length === 0) {
 			// Output departures and schedule update
 			this.sendDepartures();
 		} else {
@@ -107,10 +108,10 @@ module.exports = NodeHelper.create({
 					return json;
 				})();
 			})
-
 			Promise.all(getRouteDepartures)
 			.then( () => {
 				self.sendDepartures();
+				Log.info("ResRobot - Departures sent to clients!")
 			});
 		}
 	},
@@ -125,10 +126,16 @@ module.exports = NodeHelper.create({
 		var routeId = data.routeId;
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
+			// Log.info("departure: ");
+			// Log.info(departure);
+			if(departure.directionFlag === "1"){
+				continue;
+			}
 			var departureTime = moment(departure.date + "T" + departure.time);
 			var waitingTime = departureTime.diff(now, "minutes");
 			var departureTransportNumber = departure.ProductAtStop.num; //departure.transportNumber;
 			var departureTo = departure.direction;
+			var directionFlag = departure.directionFlag
 			var departureType = departure.ProductAtStop.catOutS; //departure.Product.catOutS;
 			// If truncation is requested, truncate ending station at first word break after n characters
 			if (this.config.truncateAfter > 0) {
@@ -150,7 +157,8 @@ module.exports = NodeHelper.create({
 					line: departureTransportNumber,			// Line number/name of departure
 					track: departure.rtTrack,			// Track number/name of departure
 					type: departureType,				// Short category code for departure
-					to: departureTo					// Destination/Direction
+					to: departureTo,					// Destination/Direction
+					direction: directionFlag
 				});
 			}
 		}

@@ -18,6 +18,11 @@ Module.register("MMM-ResRobot",{
 		fadePoint: 0.25,	// Start on 1/4th of the list.
 		apiBase: "https://api.resrobot.se/v2.1/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
+		GTFS_Regional_Realtime: {
+			apiKey: "<YOUR GTFS-Regional-Realtime API KEY HERE>",
+			baseUrl: "https://opendata.samtrafiken.se/gtfs-rt/",
+			operator: "xt"
+		},
 		routes: [
 			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
 		],					// and a destination station ID from ResRobot, default: none
@@ -100,7 +105,8 @@ Module.register("MMM-ResRobot",{
 		}
 
 		if (!this.loaded) {
-			wrapper.innerHTML = "Fetching departures ...";
+			Log.log(this.name + " is not loaded!!!");
+			wrapper.innerHTML = "Hämtar tidtabell...";
 			wrapper.className = "dimmed light small";
 			return wrapper;
 		}
@@ -164,7 +170,7 @@ Module.register("MMM-ResRobot",{
 			var depToCell = document.createElement("td");
 			depToCell.className = "to";
 			depToCell.innerHTML = departure.to;
-			row.appendChild(depToCell);
+			//row.appendChild(depToCell);
 
 			if (this.config.fade && this.config.fadePoint < 1) {
 				if (this.config.fadePoint < 0) {
@@ -188,7 +194,7 @@ Module.register("MMM-ResRobot",{
 	/* scheduleUpdate()
 	 * Schedule next update.
 	 *
-	 * argument delay number - Milliseconds before next update. If empty, 30 seconds is used.
+	 * argument delay number - Milliseconds before next update. If empty, 10 seconds is used.
 	 */
 	scheduleUpdate: function(delay) {
 		var nextLoad = 10000;
