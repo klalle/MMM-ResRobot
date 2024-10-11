@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/Alvinger/MMM-ResRobot#readme",
   "dependencies": {
-    "fetch": "*"
+    "axios": "^1.7.7",
+    "fetch": "*",
+    "gtfs-stream": "^2.2.0"
   }
 }

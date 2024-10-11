@@ -1,0 +1,28 @@
+{
+	"id": "217990500977445278",
+	"tripUpdate": {
+		"trip": {
+			"tripId": "217990000033906692",
+			"startDate": "20241009",
+			"scheduleRelationship": "SCHEDULED"
+		},
+		"stopTimeUpdate": [
+			{
+				"stopSequence": 4,
+				"arrival": {
+					"delay": 2580,
+					"time": "1728498960"
+				},
+				"departure": {
+					"delay": 2580,
+					"time": "1728498960"
+				},
+				"stopId": "9022021490014017"
+			}
+		],
+		"vehicle": {
+			"id": "9031021301100580"
+		},
+		"timestamp": "1728495864"
+	}
+}

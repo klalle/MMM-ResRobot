@@ -35,3 +35,21 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 
 You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot v2.1". If you have a key for 2.0 you need to get a new one.
 Registration is free but required.
+
+
+# GTFS realtime-data
+
+```json
+{
+   "stopSequence": 17,
+   "arrival": {
+      "delay": 63,
+      "time": "1728504843"
+   },
+   "departure": {
+      "delay": 63,
+      "time": "1728504843"
+   },
+   "stopId": "9022021480123002"
+}
+```

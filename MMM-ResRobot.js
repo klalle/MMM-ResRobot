@@ -8,7 +8,7 @@
  * based on a script from Michael Teeuw http://michaelteeuw.nl
  * MIT Licensed.
  */
-Module.register("MMM-ResRobot",{
+Module.register("MMM-ResRobot", {
 
 	// Define module defaults
 	defaults: {
@@ -16,12 +16,23 @@ Module.register("MMM-ResRobot",{
 		animationSpeed: 2000,
 		fade: true,
 		fadePoint: 0.25,	// Start on 1/4th of the list.
-		apiBase: "https://api.resrobot.se/v2.1/departureBoard?format=json&passlist=0",
-		apiKey: "<YOUR RESROBOT API KEY HERE>",
-		GTFS_Regional_Realtime: {
+		ResRobot: {
+			apiBase: "https://api.resrobot.se/v2.1/departureBoard?format=json&passlist=0",
+			apiKey: "<YOUR RESROBOT API KEY HERE>",
+			directionFlag: "2"
+		},
+		GTFSRegionalRealtime: {
 			apiKey: "<YOUR GTFS-Regional-Realtime API KEY HERE>",
+			operator: 'xt',
+			stopId: '9022021480123002',
 			baseUrl: "https://opendata.samtrafiken.se/gtfs-rt/",
-			operator: "xt"
+			updateFreq: {
+				morning: {start: 6, end: 10, frequency: 60},    // 06:00–10:00
+				midday: {start: 10, end: 15, frequency: 120},    // 10:00–15:00
+				afternoon: {start: 15, end: 20, frequency: 60},  // 15:00–20:00
+				evening: {start: 20, end: 23, frequency: 120},   // 20:00–23:00
+				night: {start: 23, end: 6, frequency: 300},      // 23:00–06:00
+			}
 		},
 		routes: [
 			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
@@ -51,25 +62,25 @@ Module.register("MMM-ResRobot",{
 	},
 
 	// Define required styles.
-	getStyles: function() {
+	getStyles: function () {
 		return ["MMM-ResRobot.css", "font-awesome.css"];
 	},
 
 	// Define required scripts.
-	getScripts: function() {
+	getScripts: function () {
 		return ["moment.js"];
 	},
 
-        // Define required translations.
-        getTranslations: function() {
-                return {
-                        en: "translations/en.json",
-                        sv: "translations/sv.json",
-                };
-        },
+	// Define required translations.
+	getTranslations: function () {
+		return {
+			en: "translations/en.json",
+			sv: "translations/sv.json",
+		};
+	},
 
 	// Define start sequence.
-	start: function() {
+	start: function () {
 		Log.info("Starting module: " + this.name);
 
 		// Set locale.
@@ -78,8 +89,8 @@ Module.register("MMM-ResRobot",{
 		this.initConfig();
 	},
 
-	socketNotificationReceived: function(notification, payload) {
-		Log.log(this.name + " received a socket notification: " + notification + " - Payload: " + payload);
+	socketNotificationReceived: function (notification, payload) {
+		//Log.log(this.name + " received a socket notification: " + notification + " - Payload: " + payload);
 		if (notification === "DEPARTURES") {
 			this.departures = payload;
 			this.loaded = true;
@@ -88,14 +99,15 @@ Module.register("MMM-ResRobot",{
 	},
 
 	// Init config
-	initConfig: function() {
+	initConfig: function () {
 		this.departures = [];
+		this.delays = [];
 		this.loaded = false;
 		this.sendSocketNotification("CONFIG", this.config);
 	},
 
 	// Override dom generator.
-	getDom: function() {
+	getDom: function () {
 		var wrapper = document.createElement("div");
 
 		if (this.config.routes === "") {
@@ -121,8 +133,13 @@ Module.register("MMM-ResRobot",{
 				break;
 			}
 			var departure = this.departures[d];
-			if (moment(departure.timestamp).isBefore(cutoff)) {
-				continue;
+
+			let calculatedDepartureTime = departure.updatedTime
+				? moment.unix(departure.updatedTime)
+				: moment(departure.timestamp);
+
+			if (calculatedDepartureTime.isBefore(cutoff)) {
+				continue; //this is done in node_helper as well!
 			}
 			n++;
 
@@ -133,12 +150,31 @@ Module.register("MMM-ResRobot",{
 			depTimeCell.className = "departuretime";
 			depTimeCell.innerHTML = departure.departureTime;
 			if (departure.waitingTime < this.config.getRelative) {
-				if (departure.waitingTime > 1) {
+				if (departure.waitingTime > 1 || departure.waitingTime < 0) {
 					depTimeCell.innerHTML = departure.waitingTime + " " + this.translate("MINUTES_SHORT");
 				} else {
-					depTimeCell.innerHTML = this.translate("NOW");
+					depTimeCell.innerHTML = "<1 min";
 				}
 			}
+			//add GTFS-delay to timetable if pressent!
+			if (departure.delay && departure.delay !== 0) {
+				if (departure.delay > 0) {
+					if (departure.delay < 60 && departure.delay >= 20) {
+						depTimeCell.innerHTML += ` (+${departure.delay}s)`;
+					} else if (departure.delay >= 60) {
+						const delayMinutes = Math.round(departure.delay / 60)
+						depTimeCell.innerHTML += ` (+${delayMinutes}m)`
+					}
+				} else {
+					if (departure.delay > -60 && departure.delay < -20) {
+						depTimeCell.innerHTML += ` (${departure.delay}s tidig!)`;
+					} else if (departure.delay <= -60){
+						const delayMinutes = Math.round(departure.delay / 60)
+						depTimeCell.innerHTML += ` (${-delayMinutes}m tidig!)`
+					}
+				}
+			}
+
 			row.appendChild(depTimeCell);
 
 			var depTypeCell = document.createElement("td");
@@ -148,7 +184,7 @@ Module.register("MMM-ResRobot",{
 			if (this.config.coloredIcons) {
 				if (this.config.colorTable[departure.type]) {
 					typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type]);
-                                } else {
+				} else {
 					typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type.charAt(0)]);
 				}
 			}
@@ -174,7 +210,7 @@ Module.register("MMM-ResRobot",{
 
 			if (this.config.fade && this.config.fadePoint < 1) {
 				if (this.config.fadePoint < 0) {
- 					this.config.fadePoint = 0;
+					this.config.fadePoint = 0;
 				}
 				var startingPoint = this.config.maximumEntries * this.config.fadePoint;
 				var steps = this.departures.length - startingPoint;
@@ -196,7 +232,7 @@ Module.register("MMM-ResRobot",{
 	 *
 	 * argument delay number - Milliseconds before next update. If empty, 10 seconds is used.
 	 */
-	scheduleUpdate: function(delay) {
+	scheduleUpdate: function (delay) {
 		var nextLoad = 10000;
 		if (typeof delay !== "undefined" && delay >= 0) {
 			nextLoad = delay;
@@ -204,7 +240,7 @@ Module.register("MMM-ResRobot",{
 
 		var self = this;
 		clearTimeout(this.updateTimer);
-		this.updateTimer = setTimeout(function() {
+		this.updateTimer = setTimeout(function () {
 			self.updateDom();
 			self.scheduleUpdate(10000);
 		}, nextLoad);
