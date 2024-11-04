@@ -149,9 +149,9 @@ Module.register("MMM-ResRobot", {
 			var depTimeCell = document.createElement("td");
 			depTimeCell.className = "departuretime";
 			depTimeCell.innerHTML = departure.departureTime;
-			if (departure.waitingTime < this.config.getRelative) {
-				if (departure.waitingTime > 1 || departure.waitingTime < 0) {
-					depTimeCell.innerHTML = departure.waitingTime + " " + this.translate("MINUTES_SHORT");
+			if (departure.waitingTime/60 < this.config.getRelative) {
+				if (departure.waitingTime > 60 || departure.waitingTime < 0) {
+					depTimeCell.innerHTML = Math.round(departure.waitingTime / 60) + " " + this.translate("MINUTES_SHORT");
 				} else {
 					depTimeCell.innerHTML = "<1 min";
 				}

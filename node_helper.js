@@ -96,8 +96,7 @@ module.exports = NodeHelper.create({
 			} else {
 				for (d in departures[routeId]) {
 					// Recalculate waitingTime
-					departures[routeId][d].waitingTime = moment(departures[routeId][d].timestamp).diff(now, "minutes");
-					Log.debug("WaitingTime: " + departures[routeId][d].waitingTime);
+					departures[routeId][d].waitingTime = moment(departures[routeId][d].timestamp).diff(now, "seconds");
 					this.departures.push(departures[routeId][d]);
 				}
 			}
@@ -140,7 +139,7 @@ module.exports = NodeHelper.create({
 				continue;
 			}
 			var departureTime = moment(departure.date + "T" + departure.time);
-			var waitingTime = departureTime.diff(now, "minutes");
+			var waitingTime = departureTime.diff(now, "seconds");
 			var departureTransportNumber = departure.ProductAtStop.num; //departure.transportNumber;
 			var departureTo = departure.direction;
 			var directionFlag = departure.directionFlag
