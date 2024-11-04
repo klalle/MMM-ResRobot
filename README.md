@@ -39,6 +39,20 @@ Registration is free but required.
 
 # GTFS realtime-data
 
+Kalles notes:
+1. Skapa ett projekt
+2. skapa api-keys för **Stops data**, **ResRobot v2.1** & **GTFS Regional Realtime**
+3. Hitta stationsid för aktuell hållplats
+  1. ladda ner _stops.xml för hela sverige [se här](https://www.trafiklab.se/api/netex-datasets/stops-data/)
+  2. lättast i webläsaren: https://opendata.samtrafiken.se/stopsregister-netex-sweden/sweden.zip?key=<API key för Stops data>     - (wget gav 406)
+    1. öppna i utforskaren / extrahera, så får du en _stops.xml-fil!
+  3. Hitta de **local-stoppoint-gid** som tillhör vald hållplats (två st => en åt varje håll)
+    1. lättast: kör regex med perl:
+    2. `perl -0777 -ne 'while (/Gävle Domarringen(?:(?!<\/StopPlace>).)*?local-stoppoint-gid<\/Key>\n *<Value>\d*:(.*?)<\/Value>\n/sg) { print "hållplats: $1\n" }' data/_stops.xml`
+      - hållplats: 9022021480123001 (bort från centrum)
+      - hållplats: 9022021480123002 (mot Rådhuset/centrum)
+4. hämta tidtabell med modifierad version av: [MMM-ResRobot](https://github.com/Alvinger/MMM-ResRobot)
+5. hämta GTFS-Realtime data filtrera ut "departure" frånd de stopTimeUpdate-poster som har med aktuell stationen att göra. se [stopSequence.json](data/stopSequence.json)
 ```json
 {
    "stopSequence": 17,
@@ -53,3 +67,13 @@ Registration is free but required.
    "stopId": "9022021480123002"
 }
 ```
+- jämför med ResRobots tider, time är epoch och redan omräknat med delay som är i sekunder!!!
+- https://www.epochconverter.com/ för att konvertera och jämföra i xtrafik-appen
+- time = 22:03:59 - delay 119s => tidtabell 22:02:00
+1. sätt sedan delayet på rätt post i tabellen från ResRobot!
+  - jag hoppas att det går att urskilja 3an och 12an på stopSequence om de har samma tid (vilket stopp i ordningen det är på turen)
+    trean verkar ha 7 och 12an 17 om jag gissar rätt!
+
+
+fick också den [här](https://github.com/staeco/gtfs-stream/blob/master/src/rt/index.js) streamren att funka manuellt om det behövs
+
