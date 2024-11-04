@@ -30,6 +30,62 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 			apiKey: ""		// Your ResRobot apiKey
         }
     },
+
+    Kalles modified version:
+    {
+      module: 'MMM-ResRobot',
+      position: 'top_left',
+      header: 'Domarringen',
+      config: {
+        routes: [
+          {
+            from: '740019209',
+            to: ''
+          }
+        ],
+        updateInterval: 30000,
+        getRelative: 20,
+        showTrack: false,
+        ResRobot: {
+          apiBase: 'https://api.resrobot.se/v2.1/departureBoard?format=json&passlist=0',
+          apiKey: '<Resrobot-api-key>',
+          directionFlag: '2'
+        },
+        GTFSRegionalRealtime: {
+          apiKey: '<GTFS-API-key>',
+          operator: 'xt',
+          stopId: '9022021480123002',
+          baseUrl: 'https://opendata.samtrafiken.se/gtfs-rt/',
+          updateFreq: {
+            morning: {
+              start: 6,
+              end: 10,
+              frequency: 60
+            },
+            midday: {
+              start: 10,
+              end: 15,
+              frequency: 120
+            },
+            afternoon: {
+              start: 15,
+              end: 20,
+              frequency: 60
+            },
+            evening: {
+              start: 20,
+              end: 23,
+              frequency: 120
+            },
+            night: {
+              start: 23,
+              end: 6,
+              frequency: 300
+            }
+          }
+        }
+      }
+    }
 ```
 # Get API key
 
