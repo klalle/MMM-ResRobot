@@ -33,7 +33,11 @@ module.exports = NodeHelper.create({
 			this.started = true;
 			this.departures = [];
 			this.delays = [];
-			this.getGTFSData()
+			try {
+				this.getGTFSData()
+			}catch (e) {
+				Log.error("failed to getGTFSData for ResResrobot!")
+			}
 			this.updateDepartures();
 		}
 	},
@@ -281,7 +285,11 @@ module.exports = NodeHelper.create({
 
 		clearTimeout(this.updateGtfsTimer);
 		this.updateGtfsTimer = setTimeout(async () => {
-			await this.getGTFSData()
+			try {
+				await this.getGTFSData()
+			}catch (e) {
+				Log.error("failed to getGTFSData for ResResrobot!")
+			}
 		}, updIntervall);
 	},
 	//function to calulate how often to call for realtime-data (max 25_000 calls / 30d)
